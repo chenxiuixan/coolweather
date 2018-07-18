@@ -2,6 +2,7 @@ package com.coolweather.app.model;
 
 /**
  * Created by chenxiuxian on 2018/6/6.
+ * 每个表在代码中有一个对应的实体类可以方便后续开发
  */
 
 public class Province {
@@ -25,5 +26,12 @@ public class Province {
     }
     public void setProvinceCode(String provinceCode){
         this.provinceCode = provinceCode;
+    }
+    public String toString() {
+        return "Province{" +
+                "id=" + id +
+                ",provinceName='" + provinceName + '\'' +
+                ", provinceCode=" + provinceCode +
+                '}';
     }
 }
