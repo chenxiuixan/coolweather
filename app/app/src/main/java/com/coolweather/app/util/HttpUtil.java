@@ -16,15 +16,15 @@ public class HttpUtil {
     public static void sendHttpRequest(final String address,final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
-            public void run() {
+            public void run() {//一般使用开启线程来发起网络请求
                 HttpURLConnection connection = null;
                 try{
                     URL url = new URL(address);
-                    connection = (HttpURLConnection)url.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setConnectTimeout(8000);
-                    connection.setReadTimeout(8000);
-                    InputStream in = connection.getInputStream();
+                    connection = (HttpURLConnection)url.openConnection();//获取HttpURLConnection实例
+                    connection.setRequestMethod("GET");//设置发送Http请求的方法
+                    connection.setConnectTimeout(8000);//设置连接超时的豪秒数
+                    connection.setReadTimeout(8000);//设置读取超时的豪秒数
+                    InputStream in = connection.getInputStream();//使用getInputStream来获取服务器返回的输入流
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                     StringBuilder response = new StringBuilder();
                     String line;
@@ -43,7 +43,7 @@ public class HttpUtil {
                     }
                 }finally {
                     if (connection != null){
-                        connection.disconnect();
+                        connection.disconnect();//将http连接关掉
                     }
                 }
             }

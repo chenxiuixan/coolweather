@@ -99,23 +99,16 @@ public class Utility {
      */
     public static void handleWeatherResponse(Context context, String response){
         try{
-            Logutil.i(tag, "handleWeatherResponse begin");
+            //server respond:{"weatherinfo":{"city":"哈尔滨","cityid":"101050101","temp1":"-14℃","temp2":"-2℃","weather":"晴转多云","img1":"n0.gif","img2":"d1.gif","ptime":"18:00"}
+            //将每一个JSONObject对象调用getString()方法将数据取出来即可
             JSONObject jsonObject = new JSONObject(response);
-            Logutil.i(tag,"get JSONObject");
             JSONObject weatherInfo = jsonObject.getJSONObject("weatherinfo");
-            Logutil.i(tag,"get weatherinfo");
             String cityName = weatherInfo.getString("city");
-            Logutil.i(tag, "handleWeatherResponse get cityName:" + cityName);
             String weatherCode = weatherInfo.getString("cityid");
-            Logutil.i(tag, "handleWeatherResponse get weatherCode:" + weatherCode);
             String temp1 = weatherInfo.getString("temp1");
-            Logutil.i(tag, "handleWeatherResponse get temp1:" + temp1);
             String temp2 = weatherInfo.getString("temp2");
-            Logutil.i(tag, "handleWeatherResponse get temp2:" + temp2);
             String weatherDesp = weatherInfo.getString("weather");
-            Logutil.i(tag, "handleWeatherResponse get weatherDesp:" + weatherDesp);
             String publishTime = weatherInfo.getString("ptime");
-            Logutil.i(tag, "handleWeatherResponse get publishTime:" + publishTime);
             saveWeatherInfo(context, cityName, weatherCode,temp1, temp2, weatherDesp, publishTime);
 
         }catch (JSONException e){
@@ -126,8 +119,8 @@ public class Utility {
     public static void saveWeatherInfo(Context context, String cityName, String weatherCode, String temp1, String temp2, String weatherDesp, String publishTime) {
         Logutil.i(tag, "saveWeatherInfo");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        editor.putBoolean("city_selected",true);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();//获取一个SharedPreferences.Editor对象
+        editor.putBoolean("city_selected",true);//向这个对象中添加数据
         editor.putString("city_name",cityName);
         editor.putString("weather_code", weatherCode);
         editor.putString("temp1", temp1);
@@ -135,6 +128,6 @@ public class Utility {
         editor.putString("weather_desp",weatherDesp);
         editor.putString("publish_time",publishTime);
         editor.putString("current_date", sdf.format(new Date()));
-        editor.commit();
+        editor.commit();//将添加的数据提交
     }
 }

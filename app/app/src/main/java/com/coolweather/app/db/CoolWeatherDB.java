@@ -27,9 +27,11 @@ public class CoolWeatherDB {
     private static CoolWeatherDB coolWeatherDB;
     private SQLiteDatabase db;
     //将构造方法私有化
+    //每次调用coolWeatherDB这个对象时都会先执行这个构造函数，构造函数中初始化帮助类，第一次调用时构造函数调用CoolWeatherOpenHelper创建一个数据库cool_weather名称的数据库，并且调用
+    //CoolWeatherOpenHelper的onCreate()方法来创建Province表、City表、Country表
     private CoolWeatherDB(Context context){
         CoolWeatherOpenHelper dbHelper = new CoolWeatherOpenHelper(context,DB_NAME,null,VERSION);
-        db = dbHelper.getWritableDatabase();
+        db = dbHelper.getWritableDatabase();//打开一个现有的数据库，如果数据不存在则创建一个
     }
     //获取CoolWeatherDB实例
     public synchronized static CoolWeatherDB getInstance(Context context){
@@ -54,6 +56,10 @@ public class CoolWeatherDB {
      */
     public List<Province> loadProvinces(){
         List<Province> list = new ArrayList<>();
+        /*调用SQLiteDatabase的query方法来查询数据。只是用第一个参数指明去查询Province表，表示查询这张表中的所有数据
+        * cursor.moveToFirst()将数据指针移动到第一行的位置，然年后进入循环去遍历每一行的数据
+        * cursor.getColumnIndex()方法获取某一列在表中对应的位置索引
+        * 最后要关闭*/
         Cursor cursor = db.query("Province",null,null,null,null,null,null);
         if (cursor.moveToFirst()){
             do{
@@ -90,6 +96,10 @@ public class CoolWeatherDB {
      * 从数据库中读取某省下所有城市信息
      */
     public List<City> loadCities(int provinceId){
+        /*调用SQLiteDatabase的query方法来查询数据。第一个参数指明去查询City表，约束条件是province_id等于传入的provinceId
+        * cursor.moveToFirst()将数据指针移动到第一行的位置，然年后进入循环去遍历每一行的数据
+        * cursor.getColumnIndex()方法获取某一列在表中对应的位置索引
+        * 最后要关闭*/
         List<City> list = new ArrayList<>();
         Cursor cursor = db.query("City",null,"province_id = ?",new String[]{String.valueOf(provinceId)},null,null,null);
         if (cursor.moveToFirst()){
@@ -127,6 +137,10 @@ public class CoolWeatherDB {
      */
     public List<Country> loadCountries(int cityId){
         List<Country> list = new ArrayList<>();
+        /*调用SQLiteDatabase的query方法来查询数据。第一个参数指明去查询City表，约束条件是province_id等于传入的provinceId
+        * cursor.moveToFirst()将数据指针移动到第一行的位置，然年后进入循环去遍历每一行的数据
+        * cursor.getColumnIndex()方法获取某一列在表中对应的位置索引
+        * 最后要关闭*/
         Cursor cursor = db.query("Country",null,"city_id = ?",new String[]{String.valueOf(cityId)},null,null,null);
         if (cursor.moveToFirst()){
             do{

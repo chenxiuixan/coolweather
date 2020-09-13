@@ -30,6 +30,8 @@ import com.coolweather.app.util.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 /**
  * Created by chenxiuxian on 2018/6/6.
@@ -59,40 +61,58 @@ public class ChooseActivity extends Activity {
 
     public static String tag = "CXX";
 
+    /*
+    * 先判断是否从WeatherActivity返回来，即从具体城市天气展示界面返回来
+    * 在判断是否选中了某个城市
+    * 如果没有选中某个
+    * */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity",false);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean("city_selected", false) && !isFromWeatherActivity){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);//使用PreferenceManager获取SharedPreferences对象，参数是Context参数
+        if (prefs.getBoolean("city_selected", false) && !isFromWeatherActivity){//使用get方法来读取数据，2个参数，1是键，2是默认值，如果传入的键找不到对应的值时返回默认值
             Intent intent = new Intent(this, WeatherActivity.class);
             startActivity(intent);
             finish();
             return;
         }
+        /*初始化控件的实例，初始化ArrayAdapter，设置为ListView的适配器，获取CoolWeatherDB的实例，给ListView设置点击事件，
+        最后调用queryProvinces()，从这里开始加载省级数据*/
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.choose_area);
         listView = (ListView)findViewById(R.id.list_view);
         titleText = (TextView)findViewById(R.id.title_text);
+        /*ListView是用于展示大量数据的，数组中的数据无法直接传递给ListView，需要借助适配器。
+        * ArrayAdapter可以通过泛型指定要适配的数据类型，如：private ArrayAdapter<String> adapter指定数据类型为String
+        * 在构造函数中将要适配的数据传入即可，如adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,dataList);
+        * 构造函数中依次传入当前上下文、ListView子项布局、要适配的数据
+        * android.R.layout.simple_list_item_1是android内置的布局文件，里面只有一个TextView，可以简单显示一段文本
+        * 调用ListView的setAdapter()方法将构建好的适配器传递进去*/
         adapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,dataList);
         listView.setAdapter(adapter);
         coolWeatherDB = CoolWeatherDB.getInstance(this);
         Logutil.i(tag, "initial all args");
+        //为ListView注册一个监听器，当点击ListView中的任何一个子项时会回调onItemClick方法，这个方法可以通过position参数判断用户点击的是哪一个子项
+        //onItemClick(AdapterView<?> parent, View view,int position, long id)
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (currentLevel == LEVEL_PROVINCE){
+                    //打印出来的log是：currenLevel is LEVEL_PROVINCE:0
                     Logutil.i(tag, "currenLevel is LEVEL_PROVINCE:" + String.valueOf(currentLevel));
                     selectedProvince = provinceList.get(i);
+                    //打印出来的log是：selectedProvince is:Province{id=34,provinceName='台湾', provinceCode=34}
                     Logutil.i(tag, "selectedProvince is:" + selectedProvince.toString());
                     queryCities();
                 }else if (currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(i);
-                    Logutil.i(tag, "currenLevel is LEVEL_CITY:" + selectedCity.toString());
+                    //打印出来的log是：selectedCity is:com.coolweather.app.model.City@40a70a7
+                    Logutil.i(tag, "selectedCity is:" + selectedCity.toString());
                     queryCountries();//加载县级数据
                 } else if (currentLevel == LEVEL_COUNTRY){
-                    Logutil.i(tag, "currenLevel is LEVEL_COUNTRY:");
+                    Logutil.i(tag, "currenLevel is LEVEL_COUNTRY:" + String.valueOf(currentLevel));
                     String countryCode = countryList.get(i).getCountryCode();
                     Logutil.i(tag, "countryCode is:" + countryCode);
                     Intent intent = new Intent(ChooseActivity.this, WeatherActivity.class);
@@ -107,6 +127,7 @@ public class ChooseActivity extends Activity {
 
     /**
      * 查询全国所有的省，优先从数据库中查询，如果没有查到再到服务器上查询
+     * 首先使用CoolWeatherDB的loadProvinces()从数据库中读取省级数据
      */
     private void queryProvinces(){
         provinceList = coolWeatherDB.loadProvinces();
@@ -181,10 +202,11 @@ public class ChooseActivity extends Activity {
         Logutil.i(tag,"queryFromServer type is:" + type);
         if (!TextUtils.isEmpty(code)){
             Logutil.i(tag,"query province's cities");
+            //即queryFromServer(selectedProvince.getProvinceCode(),"city")方法或queryFromServer(selectedCity.getCityCode(),"country")方法
             address = "http://www.weather.com.cn/data/list3/city" + code + ".xml";
             Logutil.i(tag,"address is:" + address);
         }else{
-            address = "http://www.weather.com.cn/data/list3/city.xml";
+            address = "http://www.weather.com.cn/data/list3/city.xml";//如果传入code为空，即queryFromServer(null,"province")方法
         }
         showProgreeDialog();
         HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {

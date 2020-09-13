@@ -23,10 +23,10 @@ public class AutoUpdateService extends Service{
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
+    }//
 
     @Override
-    public int onStartCommand(Intent intent,int flag,int startId){
+    public int onStartCommand(Intent intent,int flag,int startId){//会在每次服务启动的时候调用
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -42,9 +42,19 @@ public class AutoUpdateService extends Service{
         return super.onStartCommand(intent, flag, startId);
     }
 
+    @Override
+    public void onCreate(){//在创建服务的时候调用的
+        super.onCreate();
+    }
+
+    @Override
+    public void onDestroy(){//在服务销毁的时候调用
+        super.onDestroy();
+    }
+
     private void updateWeather(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String weatherCode = prefs.getString("weather_code","");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);//使用PreferenceManager获取SharedPreferences对象，参数是Context参数
+        String weatherCode = prefs.getString("weather_code","");//使用get方法来读取数据，2个参数，1是键，2是默认值，如果传入的键找不到对应的值时返回默认值
         String address = "http://www.weather.com.cn/data/cityinfo/" + weatherCode + ".html";
         HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {
             @Override

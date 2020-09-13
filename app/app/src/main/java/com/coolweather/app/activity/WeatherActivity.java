@@ -82,8 +82,8 @@ public class WeatherActivity extends Activity implements View.OnClickListener{
                 break;
             case R.id.refresh_weather:
                 publishText.setText("同步中...");
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-                String weatherCode = prefs.getString("weather_code","");
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);//使用PreferenceManager获取SharedPreferences对象，参数是Context参数
+                String weatherCode = prefs.getString("weather_code","");//使用get方法来读取数据，2个参数，1是键，2是默认值，如果传入的键找不到对应的值时返回默认值
                 if (!TextUtils.isEmpty(weatherCode)){
                     queryWeatherInfo(weatherCode);
                 }
@@ -152,8 +152,8 @@ public class WeatherActivity extends Activity implements View.OnClickListener{
     }
 
     private void showWeather(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        cityNameText.setText(prefs.getString("city_name",""));
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);//使用PreferenceManager获取SharedPreferences对象，参数是Context参数
+        cityNameText.setText(prefs.getString("city_name",""));//使用get方法来读取数据，2个参数，1是键，2是默认值，如果传入的键找不到对应的值时返回默认值
         temp1Text.setText(prefs.getString("temp1",""));
         temp2Text.setText(prefs.getString("temp2",""));
         weatherDespText.setText(prefs.getString("weather_desp",""));
