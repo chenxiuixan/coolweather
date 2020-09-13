@@ -8,8 +8,6 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,8 +18,6 @@ import android.widget.Toast;
 
 import com.coolweather.app.R;
 
-import org.w3c.dom.Text;
-
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,11 +27,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * DATE:2020/9/8 0013
- * TIME:下午 9:01
+ * DATE:2020/9/13 0013
+ * TIME:下午 11:45
  * Author:chenxiuxian
  */
-public class MemoryAnalyzerActivity extends Activity implements View.OnClickListener{
+public class CrashActivity extends Activity implements View.OnClickListener{
     // 1静态变量内存泄露:textView 会持有 Activity 的引用，而静态 view 的生命周期和类是一样长 ，这样导致 Activity 不能被回收。
     private static Context context;
     private static TextView tv;
@@ -64,12 +60,11 @@ public class MemoryAnalyzerActivity extends Activity implements View.OnClickList
         editText = (EditText)findViewById(R.id.editText);
         // 2.3没有释放bitmap
         imageView = (ImageView)findViewById(R.id.imageView);
-        Button button_change = (Button)findViewById(R.id.button_change);
         Button button_load = (Button)findViewById(R.id.button_load);
         button_load.setOnClickListener(this);
     }
 
-    class NetworkChangeReceiver extends BroadcastReceiver{
+    class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent){
             Toast.makeText(context, "network changes", Toast.LENGTH_SHORT).show();
@@ -88,15 +83,16 @@ public class MemoryAnalyzerActivity extends Activity implements View.OnClickList
     @Override
     public void onClick(View v){
         switch (v.getId()){
-            case R.id.button_change:
-                imageView.setImageResource(R.drawable.img_2);
-                break;
             case R.id.button_load:
-                sendRequest();
-                break;
-            default:
-                break;
-
+                InputStream inputStream = null;
+                Bitmap bitmap = null;
+                try {
+                    inputStream = getUrlInputStream("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1600020847033&di=8a0c1e0eeadfc532dd3fdbe8bc4bd814&imgtype=0&src=http%3A%2F%2Fgss0.baidu.com%2F-4o3dSag_xI4khGko9WTAnF6hhy%2Fzhidao%2Fpic%2Fitem%2Fac4bd11373f082028ec4b1404dfbfbedab641b7e.jpg");
+                    bitmap = getBitmap(inputStream);
+                    imageView.setImageBitmap(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
@@ -135,31 +131,5 @@ public class MemoryAnalyzerActivity extends Activity implements View.OnClickList
             Log.i("test", "输入流对象in为空");
             return null;
         }
-    }
-
-    public void sendRequest(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                InputStream inputStream = null;
-                Bitmap bitmap = null;
-                try {
-                    inputStream = getUrlInputStream("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1600020847033&di=8a0c1e0eeadfc532dd3fdbe8bc4bd814&imgtype=0&src=http%3A%2F%2Fgss0.baidu.com%2F-4o3dSag_xI4khGko9WTAnF6hhy%2Fzhidao%2Fpic%2Fitem%2Fac4bd11373f082028ec4b1404dfbfbedab641b7e.jpg");
-                    bitmap = getBitmap(inputStream);
-                    showResponse(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
-    public void showResponse(final Bitmap bitmap){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                imageView.setImageBitmap(bitmap);
-            }
-        });
     }
 }
