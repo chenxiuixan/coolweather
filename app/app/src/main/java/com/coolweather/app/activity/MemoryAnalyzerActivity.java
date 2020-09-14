@@ -23,6 +23,7 @@ import com.coolweather.app.R;
 import org.w3c.dom.Text;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +65,10 @@ public class MemoryAnalyzerActivity extends Activity implements View.OnClickList
         editText = (EditText)findViewById(R.id.editText);
         // 2.3没有释放bitmap
         imageView = (ImageView)findViewById(R.id.imageView);
+        Button button_back = (Button)findViewById(R.id.btn_back);
+        button_back.setOnClickListener(this);
         Button button_change = (Button)findViewById(R.id.button_change);
+        button_change.setOnClickListener(this);
         Button button_load = (Button)findViewById(R.id.button_load);
         button_load.setOnClickListener(this);
     }
@@ -88,6 +92,12 @@ public class MemoryAnalyzerActivity extends Activity implements View.OnClickList
     @Override
     public void onClick(View v){
         switch (v.getId()){
+            case R.id.btn_back:
+                Intent intent = new Intent(this,ChooseActivity.class);
+                intent.putExtra("from_weather_activity",true);
+                startActivity(intent);
+                finish();
+                break;
             case R.id.button_change:
                 imageView.setImageResource(R.drawable.img_2);
                 break;
@@ -161,5 +171,42 @@ public class MemoryAnalyzerActivity extends Activity implements View.OnClickList
                 imageView.setImageBitmap(bitmap);
             }
         });
+    }
+
+    //bitmap
+    public static byte[] getSmallBitmap(String filePath) {
+        Bitmap bitmap;
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, options);
+        //获取缩放比例
+        options.inSampleSize = calculateInSampleSize(options, 1000, 1000);
+        options.inJustDecodeBounds = false;
+        bitmap = BitmapFactory.decodeFile(filePath, options);
+        //bitmap转bytes
+        byte[] bytes = Bitmap2Bytes(bitmap);
+        if (null != bitmap && !bitmap.isRecycled()) {
+            bitmap.recycle();
+        }
+        return bytes;
+    }
+
+    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int heightRatio = Math.round((float) height / (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+            inSampleSize = heightRatio > widthRatio ? heightRatio : widthRatio;
+        }
+        return inSampleSize;
+    }
+
+    private static byte[] Bitmap2Bytes(Bitmap bm) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, 75, baos);
+        return baos.toByteArray();
     }
 }
